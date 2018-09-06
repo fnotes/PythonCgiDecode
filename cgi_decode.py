@@ -113,6 +113,10 @@ class Set:
                 rec = 0
                 continue
 
+            if(rec==1):
+                val.append(li)
+                continue
+
             m = re.search(r3,li)
             if m:
                 key = m.group(1)
@@ -133,10 +137,6 @@ class Set:
                 m = re.search(r6,li)
                 if m:
                     rec = 1
-                    continue
-
-            if(rec==1):
-                val.append(li)
 
         __builtins__['FILES'] = f
 
