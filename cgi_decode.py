@@ -7,7 +7,10 @@ This software is released under the MIT License.
 http://opensource.org/licenses/mit-license.php
 """
 
-import os,re,sys,tempfile
+import os
+import re
+import sys
+import tempfile
 
 class Set:
 
@@ -31,13 +34,13 @@ class Set:
     def __decode(self, buf, de='&'):
 
         h = {}
-        buf = bytes(buf,'utf-8')
+        buf = bytes(buf.encode('utf-8'))
 
         r1 = re.compile(b'([^=]+)=([^=]*)')
         r2 = re.compile(b'\+')
         r3 = re.compile(b'%([a-fA-F0-9][a-fA-F0-9])')
 
-        for v in buf.split(bytes(de,'utf-8')):
+        for v in buf.split(bytes(de.encode('utf-8'))):
 
             if v==b'':
                 continue
@@ -49,10 +52,16 @@ class Set:
                 (key,val) = (v,b'')
 
             key = re.sub(r2,b' ',key)
-            key = re.sub(r3,lambda x:bytes([int(x.group(1),16)]),key).decode('utf-8')
+            if sys.version_info[0]==3:
+                key = re.sub(r3,lambda x:bytes([int(x.group(1),16)]),key).decode('utf-8')
+            else:
+                key = re.sub(r3,lambda x:chr(int(x.group(1),16)),key)
 
             val = re.sub(r2,b' ',val)
-            val = re.sub(r3,lambda x:bytes([int(x.group(1),16)]),val).decode('utf-8')
+            if sys.version_info[0]==3:
+                val = re.sub(r3,lambda x:bytes([int(x.group(1),16)]),val).decode('utf-8')
+            else:
+                val = re.sub(r3,lambda x:chr(int(x.group(1),16)),val)
 
             self.__setHash(key,val,h)
 
@@ -78,14 +87,14 @@ class Set:
         f = []
         rec = 0
 
-        r1 = re.compile(bytes(bound,'utf-8'))
+        r1 = re.compile(bytes(bound.encode('utf-8')))
         r2 = re.compile(b'\r\n$')
         r3 = re.compile(b'Content-Disposition: form-data; name="([^"]+)"; filename="([^"]+)"')
         r4 = re.compile(b'Content-Disposition: form-data; name="([^"]+)"')
         r5 = re.compile(b'Content-Type: (.+)')
         r6 = re.compile(b'\A\r\n\Z')
 
-        for li in sys.stdin.buffer:
+        for li in sys.stdin.buffer if sys.version_info[0]==3 else sys.stdin:
 
             if re.search(r1,li):
 
